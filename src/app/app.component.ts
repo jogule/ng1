@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Todo } from './todo';
+import { TodoService } from './todo.service';
 
 @Component({
   selector: 'ng1-root',
@@ -30,7 +31,7 @@ import { Todo } from './todo';
         <a routerLink="details/{{todo.id}}" routerLinkActive="active" ariaCurrentWhenActive="page">
           {{todo.title}}
         </a>
-        <input type="checkbox" [checked]="todo.completed" />
+        <input type="checkbox" [checked]="todo.completed" (change)="updateTodo(todo)" />
         <button (click)="delete(todo.id)">Delete</button>
       </li>
     </ul>
@@ -41,7 +42,7 @@ import { Todo } from './todo';
 })
 export class AppComponent {
   title = 'PritiX';
-  todos: Todo[] = [];
+  todoService: TodoService = inject(TodoService);
   filteredTodos: Todo[] = [];
 
   newTodoTitle = ``;
@@ -52,40 +53,36 @@ export class AppComponent {
   }
 
   filterTodos() {
-    this.filteredTodos = this.todos.filter((todo) => 
-      todo.title.toLowerCase().includes(this.filter.toLowerCase())
-    );
+    this.filteredTodos = this.todoService.getFilteredTodos(this.filter);
   }
 
   addTodo() {
-    this.todos.push({
-      id: `${this.todos.length + 1}`,
-      title: this.newTodoTitle || `Todo ${this.todos.length + 1}`,
-      completed: false,
-    });
-    this.filteredTodos = this.todos;
+    this.todoService.createTodo(
+      this.newTodoTitle || `Todo ${Math.floor(Math.random() * 1000)}`,
+      false
+    );
+
+    this.fetchTodos();
   }
 
   fetchTodos() {
-    this.todos = this.generateRandomTodos();
-    this.filteredTodos = this.todos;
+    this.filteredTodos = this.todoService.getAllTodos();
   }
 
   deleteTodos() {
-    this.todos = [];
-    this.filteredTodos = this.todos;
+    this.todoService.deleteAllTodos();
+    this.fetchTodos();
   }
 
   delete(id: string) {
-    this.todos = this.todos.filter((todo) => todo.id !== id);
-    this.filteredTodos = this.todos;
+    this.todoService.deleteTodo(id);
+    this.fetchTodos();
   }
 
-  generateRandomTodos() {
-    return Array.from({ length: 10 }, (_, i) => ({
-      id: `${i + 1}`,
-      title: `Todo ${i + 1}`,
-      completed: Math.random() < 0.5,
-    }));
+  updateTodo(todo: Todo) {
+    todo.completed = !todo.completed;
+    console.log(todo);
+    this.todoService.updateTodo(todo);
+    this.fetchTodos();
   }
 }

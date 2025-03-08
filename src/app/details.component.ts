@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Todo } from './todo';
+import { TodoService } from './todo.service';
 
 @Component({
   selector: 'ng1-details',
@@ -22,6 +23,8 @@ import { Todo } from './todo';
   styles: ``
 })
 export class DetailsComponent {
+  todoService: TodoService = inject(TodoService);
+
   todo: Todo = {
     id: `1`,
     title: 'Todo 1',
@@ -34,6 +37,6 @@ export class DetailsComponent {
 
   @Input()
   set id(id: string) {
-    this.todo.id = id;
+    this.todo = this.todoService.getTodoById(id) || this.todo;
   }
 }
