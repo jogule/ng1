@@ -11,6 +11,7 @@ import { TodoService } from './todo.service';
   template: `
     <h1>Welcome to <a routerLink="/" >{{title}}</a>!</h1>
     <h2>Learn and Fun!</h2>
+    <h3>v1.1.0</h3>
     <section>
       <input type="text" placeholder="Enter new todo" [(ngModel)]="newTodoTitle" />
       <button (click)="addTodo()">Add</button>
