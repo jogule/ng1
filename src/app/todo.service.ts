@@ -41,7 +41,6 @@ export class TodoService {
       body: JSON.stringify(query),
     });
     const result = await response.json();
-    console.table(result.data.todo_by_pk);
 
     return result.data.todo_by_pk;
   }
@@ -73,7 +72,6 @@ export class TodoService {
         body: JSON.stringify(query)
     });
     const result = await response.json();
-    console.table(result.data.todos.items);
 
     return result.data.todos.items;  
   }
@@ -97,7 +95,6 @@ export class TodoService {
         body: JSON.stringify({ query: query })
     });
     const result = await response.json();
-    console.table(result.data.todos.items);
 
     return result.data.todos.items;  
   }
@@ -135,7 +132,6 @@ export class TodoService {
     });
   
     const response = await result.json();
-    console.table(response.data.createTodo);
 
     return response.data.createTodo;
   }
@@ -170,7 +166,6 @@ export class TodoService {
     });
 
     const result = await response.json();
-    console.log(`Record deleted: ${ JSON.stringify(result.data) }`);
   }
 
   async updateTodo(updatedTodo: Todo): Promise<Todo> {
@@ -206,7 +201,6 @@ export class TodoService {
     });
   
     const result = await res.json();
-    console.table(result.data.updateTodo);
 
     return result.data.updateTodo;
   }
