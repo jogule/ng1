@@ -54,21 +54,21 @@ export class AppComponent {
     this.fetchTodos();
   }
 
-  filterTodos() {
-    this.filteredTodos = this.todoService.getFilteredTodos(this.filter);
+  async filterTodos() {
+    this.filteredTodos = await this.todoService.getFilteredTodos(this.filter);
   }
 
-  addTodo() {
-    this.todoService.createTodo(
+  async addTodo() {
+    await this.todoService.createTodo(
       this.newTodoTitle || `Todo ${Math.floor(Math.random() * 1000)}`,
       false
     );
 
-    this.fetchTodos();
+    await this.fetchTodos();
   }
 
-  fetchTodos() {
-    this.filteredTodos = this.todoService.getAllTodos();
+  async fetchTodos() {
+    this.filteredTodos = await this.todoService.getAllTodos();
   }
 
   clearFilter() {
@@ -76,21 +76,21 @@ export class AppComponent {
     this.filterTodos();
   }
 
-  deleteAllTodos() {
-    this.todoService.deleteAllTodos();
-    this.fetchTodos();
+  async deleteAllTodos() {
+    await this.todoService.deleteAllTodos();
+    await this.fetchTodos();
     this.router.navigate(['/']);
   }
 
-  deleteTodoById(id: string) {
-    this.todoService.deleteTodo(id);
-    this.fetchTodos();
+  async deleteTodoById(id: string) {
+    await this.todoService.deleteTodo(id);
+    await this.fetchTodos();
     this.router.navigate(['/']);
   }
 
-  updateTodo(todo: Todo) {
+  async updateTodo(todo: Todo) {
     todo.completed = !todo.completed;
-    this.todoService.updateTodo(todo);
-    this.fetchTodos();
+    await this.todoService.updateTodo(todo);
+    await this.fetchTodos();
   }
 }

@@ -5,61 +5,218 @@ import { Todo } from './todo';
   providedIn: 'root'
 })
 export class TodoService {
-  todos: Todo[] = [];
 
   constructor() {
-    this.todos = this.generateRandomTodos();
+    this.getAllTodos().then((todos) => {
+      if (todos.length === 0) {
+        for (let i = 0; i < 10; i++) {
+          const todo = this.generateRandomTodo();
+          this.createTodo(todo.title, todo.completed).then(() => {
+            console.log(`Created todo: ${todo.title}`);
+          });
+        }
+      }
+    });
   }
 
-  getTodoById(id: string): Todo | undefined {
-    return this.todos.find((todo) => todo.id === id);
+  async getTodoById(id: string): Promise<Todo | undefined> {
+    const gql = `
+    query getById($id: ID!) {
+      todo_by_pk(id: $id) {
+        id
+        title
+        completed
+      }
+    }`;
+
+    const query = {
+      query: gql,
+      variables: {
+        id: id,
+      },
+    };
+
+    const endpoint = "/data-api/graphql";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query),
+    });
+    const result = await response.json();
+    console.table(result.data.todo_by_pk);
+
+    return result.data.todo_by_pk;
   }
 
-  getFilteredTodos(filter: string): Todo[] {
-    return this.todos.filter((todo) => 
-      todo.title.toLowerCase().includes(filter.toLowerCase())
-    );
+  async getFilteredTodos(filter: string): Promise<Todo[]> {
+
+    const gql = `
+    query FilteredItems($filter: String) {
+      todos(filter: { title: { contains: $filter } }) {
+        items {
+          id
+          title
+          completed
+        }
+      }
+    }`;
+
+    const query = {
+      query: gql,
+      variables: {
+        filter: filter
+      }
+    };
+    
+    const endpoint = "/data-api/graphql";
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(query)
+    });
+    const result = await response.json();
+    console.table(result.data.todos.items);
+
+    return result.data.todos.items;  
   }
 
-  getAllTodos(): Todo[] {
-    return this.todos;
+  async getAllTodos(): Promise<Todo[]> {
+    const query = `
+    {
+      todos {
+        items {
+          id
+          title
+          completed
+        }
+      }
+    }`;
+    
+    const endpoint = "/data-api/graphql";
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query })
+    });
+    const result = await response.json();
+    console.table(result.data.todos.items);
+
+    return result.data.todos.items;  
   }
 
-  createTodo(name: string, completed: boolean): string {
-    const id = this.todos.length + 1
+  async createTodo(name: string, completed: boolean): Promise<string> {
+    const id = crypto.randomUUID();
 
-    this.todos.push({
+    const data = {
       id: `${id}`,
       title: name,
       completed: completed,
+    };
+
+    const gql = `
+      mutation create($item: CreateTodoInput!) {
+        createTodo(item: $item) {
+          id
+          title
+          completed
+        }
+      }`;
+    
+    const query = {
+      query: gql,
+      variables: {
+        item: data
+      } 
+    };
+    
+    const endpoint = "/data-api/graphql";
+    const result = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query)
     });
+  
+    const response = await result.json();
+    console.table(response.data.createTodo);
 
     return `${id}`;
   }
 
-  deleteAllTodos(): void {
-    this.todos = [];
+  async deleteAllTodos(): Promise<void> {
+    const todos = await this.getAllTodos();
+    for (const todo of todos) {
+      await this.deleteTodo(todo.id);
+    }
   }
 
-  deleteTodo(id: string): void {
-    this.todos = this.todos.filter((todo) => todo.id !== id);
-  }
+  async deleteTodo(id: string): Promise<void> {
+    const gql = `
+      mutation del($id: ID!, $_partitionKeyValue: String!) {
+        deleteTodo(id: $id, _partitionKeyValue: $_partitionKeyValue) {
+          id
+        }
+      }`;
 
-  updateTodo(updatedTodo: Todo): void {
-    this.todos = this.todos.map((todo) => {
-      if (todo.id === updatedTodo.id) {
-        return updatedTodo;
+    const query = {
+      query: gql,
+      variables: {
+        id: id,
+        _partitionKeyValue: id
       }
+    };
 
-      return todo;
+    const endpoint = "/data-api/graphql";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query)
     });
+
+    const result = await response.json();
+    console.log(`Record deleted: ${ JSON.stringify(result.data) }`);
   }
 
-  generateRandomTodos() {
-    return Array.from({ length: 10 }, (_, i) => ({
-      id: `${i + 1}`,
-      title: `Todo ${i + 1}`,
+  async updateTodo(updatedTodo: Todo): Promise<void> {
+    const data = {
+      id: updatedTodo.id,
+      title: updatedTodo.title,
+      completed: updatedTodo.completed
+    };
+  
+    const gql = `
+      mutation update($id: ID!, $_partitionKeyValue: String!, $item: UpdateTodoInput!) {
+        updateTodo(id: $id, _partitionKeyValue: $_partitionKeyValue, item: $item) {
+          id
+          title
+          completed
+        }
+      }`;
+  
+    const query = {
+      query: gql,
+      variables: {
+        id: updatedTodo.id,
+        _partitionKeyValue: updatedTodo.id,
+        item: data
+      } 
+    };
+  
+    const endpoint = "/data-api/graphql";
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(query)
+    });
+  
+    const result = await res.json();
+    console.table(result.data.updateTodo);
+  }
+
+  generateRandomTodo() {
+    return {
+      id: `${crypto.randomUUID()}`,
+      title: `Todo ${Math.floor(Math.random() * 1000)}`,
       completed: Math.random() < 0.5,
-    }));
+    };
   }
 }

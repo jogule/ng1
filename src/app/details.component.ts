@@ -44,10 +44,15 @@ export class DetailsComponent {
 
   @Input()
   set id(id: string) {
-    this.todo = this.todoService.getTodoById(id) || this.todo;
+    this.todoService.getTodoById(id).then((todo) => {
+      if (todo) {
+        this.todo = todo;
+      }
+    });
   }
 
-  save() {
+  async save() {
+    await this.todoService.updateTodo(this.todo);
     this.router.navigate(['/']);
   }
 }
