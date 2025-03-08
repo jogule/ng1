@@ -39,9 +39,6 @@ export class DetailsComponent {
     completed: false
   };
 
-  ngOnInit() {
-  }
-
   @Input()
   set id(id: string) {
     this.todoService.getTodoById(id).then((todo) => {
