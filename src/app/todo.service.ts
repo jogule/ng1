@@ -104,10 +104,10 @@ export class TodoService {
     return result.data.todos.items;  
   }
 
-  async createTodo(name: string, completed: boolean): Promise<string> {
+  async createTodo(name: string, completed: boolean): Promise<Todo> {
     const id = crypto.randomUUID();
 
-    const data = {
+    const data: Todo = {
       id: `${id}`,
       title: name,
       completed: completed,
@@ -139,11 +139,10 @@ export class TodoService {
     const response = await result.json();
     console.table(response.data.createTodo);
 
-    return `${id}`;
+    return response.data.createTodo;
   }
 
-  async deleteAllTodos(): Promise<void> {
-    const todos = await this.getAllTodos();
+  async deleteAllTodos(todos:Todo[]): Promise<void> {
     for (const todo of todos) {
       await this.deleteTodo(todo.id);
     }
@@ -176,7 +175,7 @@ export class TodoService {
     console.log(`Record deleted: ${ JSON.stringify(result.data) }`);
   }
 
-  async updateTodo(updatedTodo: Todo): Promise<void> {
+  async updateTodo(updatedTodo: Todo): Promise<Todo> {
     const data = {
       id: updatedTodo.id,
       title: updatedTodo.title,
@@ -210,6 +209,8 @@ export class TodoService {
   
     const result = await res.json();
     console.table(result.data.updateTodo);
+
+    return result.data.updateTodo;
   }
 
   generateRandomTodo() {

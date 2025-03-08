@@ -28,7 +28,7 @@ import { TodoService } from './todo.service';
     </section>
 
     <ul>
-      <li *ngFor="let todo of filteredTodos">
+      <li *ngFor="let todo of filteredTodos()">
         <a routerLink="details/{{todo.id}}" routerLinkActive="active" ariaCurrentWhenActive="page">
           {{todo.title}}
         </a>
@@ -43,7 +43,7 @@ import { TodoService } from './todo.service';
 })
 export class AppComponent {
   title = 'PritiX';
-  filteredTodos: Todo[] = [];
+  filteredTodos = signal<Todo[]>([]);
   router: Router = inject(Router);
   todoService: TodoService = inject(TodoService);
 
@@ -55,20 +55,20 @@ export class AppComponent {
   }
 
   async filterTodos() {
-    this.filteredTodos = await this.todoService.getFilteredTodos(this.filter);
+    this.filteredTodos.set(await this.todoService.getFilteredTodos(this.filter));
   }
 
   async addTodo() {
-    await this.todoService.createTodo(
+    const newTodo = await this.todoService.createTodo(
       this.newTodoTitle || `Todo ${Math.floor(Math.random() * 1000)}`,
       false
     );
 
-    // await this.fetchTodos();
+    this.filteredTodos.update(filteredTodos => [...filteredTodos, newTodo]);
   }
 
   async fetchTodos() {
-    this.filteredTodos = await this.todoService.getAllTodos();
+    this.filteredTodos.set(await this.todoService.getAllTodos());
   }
 
   async clearFilter() {
@@ -77,20 +77,19 @@ export class AppComponent {
   }
 
   async deleteAllTodos() {
-    await this.todoService.deleteAllTodos();
-    await this.fetchTodos();
+    await this.todoService.deleteAllTodos(this.filteredTodos());
+    this.filteredTodos.set([]);
     this.router.navigate(['/']);
   }
 
   async deleteTodoById(id: string) {
     await this.todoService.deleteTodo(id);
-    await this.fetchTodos();
+    this.filteredTodos.update(filteredTodos => filteredTodos.filter(todo => todo.id !== id)); 
     this.router.navigate(['/']);
   }
 
   async updateTodo(todo: Todo) {
     todo.completed = !todo.completed;
-    await this.todoService.updateTodo(todo);
-    await this.fetchTodos();
+    const updatedTodo = await this.todoService.updateTodo(todo);
   }
 }
