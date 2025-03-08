@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Todo } from './todo';
 
 @Component({
   selector: 'ng1-root',
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, RouterLink, RouterLinkActive],
   template: `
-    <h1>Welcome to {{title}}!</h1>
+    <h1>Welcome to <a routerLink="/" >{{title}}</a>!</h1>
     <h2>Learn and Fun!</h2>
     <section>
       <input type="text" placeholder="Enter new todo" [(ngModel)]="newTodoTitle" />
@@ -16,7 +17,7 @@ import { FormsModule } from '@angular/forms';
     </section>
 
     <section>
-      <button (click)="listTodos()">Refresh</button>
+      <button (click)="fetchTodos()">Refresh</button>
       <button (click)="deleteTodos()">Delete All</button>
     </section>
 
@@ -25,8 +26,11 @@ import { FormsModule } from '@angular/forms';
     </section>
 
     <ul>
-      <li *ngFor="let todo of filteredTodos" (click)="todo.completed = !todo.completed">
-        {{todo.title}} - {{todo.completed ? 'Completed' : 'Not Completed'}}
+      <li *ngFor="let todo of filteredTodos">
+        <a routerLink="details/{{todo.id}}" routerLinkActive="active" ariaCurrentWhenActive="page">
+          {{todo.title}}
+        </a>
+        <input type="checkbox" [checked]="todo.completed" />
         <button (click)="delete(todo.id)">Delete</button>
       </li>
     </ul>
@@ -44,7 +48,7 @@ export class AppComponent {
   filter = ``;
 
   constructor() {
-    this.listTodos();
+    this.fetchTodos();
   }
 
   filterTodos() {
@@ -55,36 +59,33 @@ export class AppComponent {
 
   addTodo() {
     this.todos.push({
-      id: this.todos.length + 1,
+      id: `${this.todos.length + 1}`,
       title: this.newTodoTitle || `Todo ${this.todos.length + 1}`,
       completed: false,
     });
+    this.filteredTodos = this.todos;
   }
 
-  listTodos() {
+  fetchTodos() {
     this.todos = this.generateRandomTodos();
     this.filteredTodos = this.todos;
   }
 
   deleteTodos() {
     this.todos = [];
+    this.filteredTodos = this.todos;
   }
 
-  delete(id: number) {
+  delete(id: string) {
     this.todos = this.todos.filter((todo) => todo.id !== id);
+    this.filteredTodos = this.todos;
   }
 
   generateRandomTodos() {
     return Array.from({ length: 10 }, (_, i) => ({
-      id: i + 1,
+      id: `${i + 1}`,
       title: `Todo ${i + 1}`,
       completed: Math.random() < 0.5,
     }));
   }
-}
-
-export interface Todo {
-  id: number;
-  title: string;
-  completed: boolean;
 }
