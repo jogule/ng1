@@ -27,7 +27,7 @@
       "authentication": {
         "provider": "StaticWebApps"
       },
-      "mode": "development"
+      "mode": "production"
     }
   },
   "entities": {
