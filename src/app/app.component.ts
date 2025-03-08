@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -64,16 +64,16 @@ export class AppComponent {
       false
     );
 
-    await this.fetchTodos();
+    // await this.fetchTodos();
   }
 
   async fetchTodos() {
     this.filteredTodos = await this.todoService.getAllTodos();
   }
 
-  clearFilter() {
+  async clearFilter() {
     this.filter = '';
-    this.filterTodos();
+    await this.filterTodos();
   }
 
   async deleteAllTodos() {
