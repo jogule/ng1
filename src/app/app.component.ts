@@ -9,14 +9,23 @@ import { FormsModule } from '@angular/forms';
   template: `
     <h1>Welcome to {{title}}!</h1>
     <h2>Learn and Fun!</h2>
-    <input type="text" placeholder="Enter new todo" [(ngModel)]="newTodoTitle" />
-    <button (click)="addTodo()">Add</button>
+    <section>
+      <input type="text" placeholder="Enter new todo" [(ngModel)]="newTodoTitle" />
+      <button (click)="addTodo()">Add</button>
+      <button (click)="newTodoTitle = ''">Clear</button>
+    </section>
 
-    <button (click)="listTodos()">Fetch</button>
-    <button (click)="deleteTodos()">Delete All</button>
+    <section>
+      <button (click)="listTodos()">Refresh</button>
+      <button (click)="deleteTodos()">Delete All</button>
+    </section>
+
+    <section>
+      <input type="text" placeholder="Search todo" [(ngModel)]="filter" (input)="filterTodos()" />
+    </section>
 
     <ul>
-      <li *ngFor="let todo of todos" (click)="todo.completed = !todo.completed">
+      <li *ngFor="let todo of filteredTodos" (click)="todo.completed = !todo.completed">
         {{todo.title}} - {{todo.completed ? 'Completed' : 'Not Completed'}}
         <button (click)="delete(todo.id)">Delete</button>
       </li>
@@ -28,12 +37,20 @@ import { FormsModule } from '@angular/forms';
 })
 export class AppComponent {
   title = 'PritiX';
-  todos: { id: number; title: string; completed: boolean }[] = [];
+  todos: Todo[] = [];
+  filteredTodos: Todo[] = [];
 
   newTodoTitle = ``;
+  filter = ``;
 
   constructor() {
     this.listTodos();
+  }
+
+  filterTodos() {
+    this.filteredTodos = this.todos.filter((todo) => 
+      todo.title.toLowerCase().includes(this.filter.toLowerCase())
+    );
   }
 
   addTodo() {
@@ -46,6 +63,7 @@ export class AppComponent {
 
   listTodos() {
     this.todos = this.generateRandomTodos();
+    this.filteredTodos = this.todos;
   }
 
   deleteTodos() {
@@ -63,4 +81,10 @@ export class AppComponent {
       completed: Math.random() < 0.5,
     }));
   }
+}
+
+export interface Todo {
+  id: number;
+  title: string;
+  completed: boolean;
 }
