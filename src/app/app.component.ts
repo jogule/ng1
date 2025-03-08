@@ -11,7 +11,7 @@ import { TodoService } from './todo.service';
   template: `
     <h1>Welcome to <a routerLink="/" >{{title}}</a>!</h1>
     <h2>Learn and Fun!</h2>
-    <h3>v1.0.0</h3>
+    <h3>v1.1.0</h3>
     <section>
       <input type="text" placeholder="Enter new todo" [(ngModel)]="newTodoTitle" />
       <button (click)="addTodo()">Add</button>
@@ -30,7 +30,7 @@ import { TodoService } from './todo.service';
     </section>
 
     <ul>
-      <li *ngFor="let todo of filteredTodos()">
+      <li *ngFor="let todo of filteredTodos">
         <a routerLink="details/{{todo.id}}" routerLinkActive="active" ariaCurrentWhenActive="page">
           {{todo.title}}
         </a>
@@ -45,7 +45,7 @@ import { TodoService } from './todo.service';
 })
 export class AppComponent {
   title = 'PritiX';
-  filteredTodos = signal<Todo[]>([]);
+  filteredTodos: Todo[] = [];
   router: Router = inject(Router);
   todoService: TodoService = inject(TodoService);
 
@@ -63,7 +63,7 @@ export class AppComponent {
   }
 
   async filterTodos() {
-    this.filteredTodos.set(await this.todoService.getFilteredTodos(this.filter));
+    this.filteredTodos = await this.todoService.getFilteredTodos(this.filter);
   }
 
   async addTodo() {
@@ -72,11 +72,11 @@ export class AppComponent {
       false
     );
 
-    this.filteredTodos.update(filteredTodos => [...filteredTodos, newTodo]);
+    this.filteredTodos = [...this.filteredTodos, newTodo];
   }
 
   async fetchTodos() {
-    this.filteredTodos.set(await this.todoService.getAllTodos());
+    this.filteredTodos = await this.todoService.getAllTodos();
   }
 
   async clearFilter() {
@@ -85,14 +85,14 @@ export class AppComponent {
   }
 
   async deleteAllTodos() {
-    await this.todoService.deleteAllTodos(this.filteredTodos());
-    this.filteredTodos.set([]);
+    await this.todoService.deleteAllTodos(this.filteredTodos);
+    this.filteredTodos = [];
     this.router.navigate(['/']);
   }
 
   async deleteTodoById(id: string) {
     await this.todoService.deleteTodo(id);
-    this.filteredTodos.update(filteredTodos => filteredTodos.filter(todo => todo.id !== id)); 
+    this.filteredTodos = this.filteredTodos.filter(todo => todo.id !== id); 
     this.router.navigate(['/']);
   }
 
