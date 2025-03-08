@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Todo } from './todo';
@@ -19,11 +19,12 @@ import { TodoService } from './todo.service';
 
     <section>
       <button (click)="fetchTodos()">Refresh</button>
-      <button (click)="deleteTodos()">Delete All</button>
+      <button (click)="deleteAllTodos()">Delete All</button>
     </section>
 
     <section>
       <input type="text" placeholder="Search todo" [(ngModel)]="filter" (input)="filterTodos()" />
+      <button (click)="clearFilter()">Clear</button>
     </section>
 
     <ul>
@@ -32,7 +33,7 @@ import { TodoService } from './todo.service';
           {{todo.title}}
         </a>
         <input type="checkbox" [checked]="todo.completed" (change)="updateTodo(todo)" />
-        <button (click)="delete(todo.id)">Delete</button>
+        <button (click)="deleteTodoById(todo.id)">Delete</button>
       </li>
     </ul>
 
@@ -42,8 +43,9 @@ import { TodoService } from './todo.service';
 })
 export class AppComponent {
   title = 'PritiX';
-  todoService: TodoService = inject(TodoService);
   filteredTodos: Todo[] = [];
+  router: Router = inject(Router);
+  todoService: TodoService = inject(TodoService);
 
   newTodoTitle = ``;
   filter = ``;
@@ -69,19 +71,25 @@ export class AppComponent {
     this.filteredTodos = this.todoService.getAllTodos();
   }
 
-  deleteTodos() {
-    this.todoService.deleteAllTodos();
-    this.fetchTodos();
+  clearFilter() {
+    this.filter = '';
+    this.filterTodos();
   }
 
-  delete(id: string) {
+  deleteAllTodos() {
+    this.todoService.deleteAllTodos();
+    this.fetchTodos();
+    this.router.navigate(['/']);
+  }
+
+  deleteTodoById(id: string) {
     this.todoService.deleteTodo(id);
     this.fetchTodos();
+    this.router.navigate(['/']);
   }
 
   updateTodo(todo: Todo) {
     todo.completed = !todo.completed;
-    console.log(todo);
     this.todoService.updateTodo(todo);
     this.fetchTodos();
   }
