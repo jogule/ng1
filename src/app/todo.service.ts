@@ -6,17 +6,15 @@ import { Todo } from './todo';
 })
 export class TodoService {
 
-  constructor() {
-    this.getAllTodos().then((todos) => {
-      if (todos.length === 0) {
-        for (let i = 0; i < 10; i++) {
-          const todo = this.generateRandomTodo();
-          this.createTodo(todo.title, todo.completed).then(() => {
-            console.log(`Created todo: ${todo.title}`);
-          });
-        }
+  async mock() {
+    const todos = await this.getAllTodos();
+
+    if (todos.length === 0) {
+      for (let i = 0; i < 10; i++) {
+        const todo = this.generateRandomTodo();
+        await this.createTodo(todo.title, todo.completed);
       }
-    });
+    }
   }
 
   async getTodoById(id: string): Promise<Todo | undefined> {

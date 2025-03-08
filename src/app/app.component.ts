@@ -20,6 +20,7 @@ import { TodoService } from './todo.service';
     <section>
       <button (click)="fetchTodos()">Refresh</button>
       <button (click)="deleteAllTodos()">Delete All</button>
+      <button (click)="mock()">Mock</button>
     </section>
 
     <section>
@@ -97,5 +98,10 @@ export class AppComponent {
   async updateTodo(todo: Todo) {
     todo.completed = !todo.completed;
     const updatedTodo = await this.todoService.updateTodo(todo);
+  }
+
+  async mock() {
+    await this.todoService.mock();
+    await this.fetchTodos();
   }
 }
