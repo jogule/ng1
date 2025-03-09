@@ -53,7 +53,7 @@ export class AppComponent {
   filter = ``;
 
   constructor() {
-    this.fetchTodos();
+    // this.fetchTodos();
 
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -91,8 +91,8 @@ export class AppComponent {
   }
 
   async deleteTodoById(id: string) {
-    await this.todoService.deleteTodo(id);
     this.filteredTodos = this.filteredTodos.filter(todo => todo.id !== id); 
+    await this.todoService.deleteTodo(id);
     this.router.navigate(['/']);
   }
 
