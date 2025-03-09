@@ -2,6 +2,14 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.1.
 
+## Prerequisites
+
+Install swa
+
+```bash
+npm install -g @azure/static-web-apps-cli
+```
+
 ## Development server
 
 To start a local development server, run:
@@ -10,7 +18,12 @@ To start a local development server, run:
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+```bash
+npm start
+swa start http://localhost:4200 --data-api-location swa-db-connections
+```
+
+Once the server is running, open your browser and navigate to `http://localhost:4280/`. The application will automatically reload whenever you modify any of the source files.
 
 ## Code scaffolding
 
